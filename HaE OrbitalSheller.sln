@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HaE OrbitalSheller", "HaE OrbitalSheller\HaE OrbitalSheller.csproj", "{7977332F-B51C-4219-B5BF-6054B9AF2637}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7977332F-B51C-4219-B5BF-6054B9AF2637}.Debug|x64.ActiveCfg = Debug|x64
+		{7977332F-B51C-4219-B5BF-6054B9AF2637}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CFC27281-B7EB-4C9D-B774-E738839C0D5F}
+	EndGlobalSection
+EndGlobal
