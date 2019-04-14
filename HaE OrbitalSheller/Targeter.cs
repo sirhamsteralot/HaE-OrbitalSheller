@@ -24,7 +24,10 @@ namespace IngameScript
         {
             public double speedCap;
             public double launchVelocity;
+            public double tolerance = 75;
             public IMyShipController reference;
+
+            public double TargetingProgress => simTargeting?.GetLastMissDistance() ?? 0;
 
             public Action<Vector3D> directionFoundCallback;
 
@@ -44,16 +47,18 @@ namespace IngameScript
                 Vector3D direction = Vector3D.Normalize(position - startPos);
 
                 simTargeting = new Simulated_Targeting(reference, position, startPos, direction, 0, planet, 9.81, launchVelocity, speedCap);
+                simTargeting.tolerance = tolerance;
 
                 fireCallbackOnce = false;
             }
 
-            public void TargetPosition(Vector3D position, Vector3D planetCenter, double planetRadius)
+            public void TargetPosition(Vector3D position, Vector3D planetCenter, double planetRadius, double gravity = 9.81)
             {
                 Vector3D startPos = reference.GetPosition();
                 Vector3D direction = Vector3D.Normalize(position - startPos);
 
-                simTargeting = new Simulated_Targeting(reference, position, startPos, direction, 0, planetCenter, planetRadius, 9.81, launchVelocity, speedCap);
+                simTargeting = new Simulated_Targeting(reference, position, startPos, direction, 0, planetCenter, planetRadius, gravity, launchVelocity, speedCap);
+                simTargeting.tolerance = tolerance;
 
                 fireCallbackOnce = false;
             }

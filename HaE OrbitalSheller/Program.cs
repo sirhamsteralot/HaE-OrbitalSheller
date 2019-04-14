@@ -28,20 +28,22 @@ namespace IngameScript
         Cannon cannon;
         Targeter targeter;
 
+        bool initialized = false;
+
         public Program()
         {
             scheduler = new Scheduler();
             scheduler.AddTask(Init());
-            Runtime.UpdateFrequency = UpdateFrequency.Update1;
+            Runtime.UpdateFrequency = UpdateFrequency.Update1 | UpdateFrequency.Update10;
         }
 
         public IEnumerator<bool> Init()
         {
             cannonSettings = new INISerializer("CannonSettings");
             cannonSettings.AddValue("referenceName", x => x, "RCReference");
-            cannonSettings.AddValue("speedCap", x => double.Parse(x), "RCReference");
-            cannonSettings.AddValue("launchVelocity", x => double.Parse(x), "RCReference");
-            cannonSettings.AddValue("sourceRotorTName", x => x, "[OrbitalCannonBase] [Azimuth]");
+            cannonSettings.AddValue("speedCap", x => double.Parse(x), 104.38);
+            cannonSettings.AddValue("launchVelocity", x => double.Parse(x), 100);
+            cannonSettings.AddValue("sourceRotorTName", x => x, "[OrbitalCannonBase]_[Azimuth]");
 
 
             if (Me.CustomData == "")
@@ -62,6 +64,11 @@ namespace IngameScript
             IMyShipController reference = GridTerminalSystem.GetBlockWithName((string)cannonSettings.GetValue("referenceName")) as IMyShipController;
             IMyMotorStator sourceRotor = GridTerminalSystem.GetBlockWithName((string)cannonSettings.GetValue("sourceRotorTName")) as IMyMotorStator;
 
+            Echo($"Getting blocks status:...\nreference: {reference != null}\nsourceRotor: {sourceRotor != null}");
+
+            if (reference == null || sourceRotor == null)
+                throw new Exception("cant get blocks!");
+
             yield return true;
             targeter = new Targeter
                 (
@@ -74,11 +81,19 @@ namespace IngameScript
             yield return true;
 
             cannon = Cannon.CreateCannon(sourceRotor, GTSUtils, ingameTime, reference, "[Azimuth]", "[Elevation]");
+            yield return true;
+            Echo("Initialized!");
+            initialized = true;
         }
 
 
         public void Main(string argument, UpdateType updateSource)
         {
+            scheduler.Main();
+
+            if (!initialized)
+                return;
+
             HandleCommands(argument);
 
             if ((updateSource & UpdateType.Update1) != 0)
@@ -88,17 +103,22 @@ namespace IngameScript
                 targeter.TargetingLoop();
                 cannon.Tick();
             }
+
+            if ((updateSource & UpdateType.Update10) != 0)
+            {
+                Me.GetSurface(0).WriteText($"{targeter.TargetingProgress}");
+            }
         }
 
         public void HandleCommands(string argument)
         {
-            if (argument.StartsWith("TargetPosition "))
+            if (argument.StartsWith("TargetPosition"))
                 TargetPosition(argument);
         }
 
         public void TargetPosition(string args)
         {
-            string[] split = args.Split(' ');
+            string[] split = args.Split('|');
 
             if (split.Length < 4)
             {
@@ -127,8 +147,15 @@ namespace IngameScript
                 return;
             }
 
-            targeter.TargetPosition(targetPosition, planetPosition, planetRadius);
-            Echo($"Targeting...\nTarget: {targetPosition}\nplanetCore: {planetPosition}\nplanetRadius:{planetRadius}");
+            double tweakFactor = 1;
+            if (split.Length > 4 && !double.TryParse(split[4], out tweakFactor))
+            {
+                Echo("Invalid tweakFactor");
+                return;
+            }
+
+            targeter.TargetPosition(targetPosition, planetPosition, planetRadius, 9.81 * tweakFactor);
+            Echo($"Targeting...\nTarget: {targetPosition}\nplanetCore: {planetPosition}\nplanetRadius: {planetRadius}\ntweakFactor: {tweakFactor}");
         }
 
         public void TargetCalculatedCallback(Vector3D direction)
