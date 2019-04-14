@@ -97,6 +97,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cannon.cs" />
+    <Compile Include="DeadzoneProvider.cs" />
+    <Compile Include="ITurretGroup.cs" />
     <Compile Include="MDK\Bootstrapper.cs" />
     <AdditionalFiles Include="MDK\MDK.options">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -105,7 +107,10 @@
     <Compile Include="Readme.cs" />
     <AdditionalFiles Include="thumb.png" />
     <AdditionalFiles Include="MDK\whitelist.cache" />
+    <Compile Include="RotorControl.cs" />
+    <Compile Include="RotorTurretGroup.cs" />
     <Compile Include="Targeter.cs" />
+    <Compile Include="TurretGroupUtils.cs" />
   </ItemGroup>
   <Import Project="..\..\..\..\MDK_Projects\Shared Projects\HaE GridTerminalSystemUtils\HaE GridTerminalSystemUtils.projitems" Label="Shared" />
   <Import Project="..\..\..\..\MDK_Projects\Shared Projects\VectorUtils\VectorUtils.projitems" Label="Shared" />
@@ -115,6 +120,7 @@
   <Import Project="..\..\..\..\MDK_Projects\Shared Projects\HaE Targeting\HaE Targeting.projitems" Label="Shared" />
   <Import Project="..\..\..\..\MDK_Projects\Shared Projects\HaE Visualization\HaE Visualization.projitems" Label="Shared" />
   <Import Project="..\..\..\..\MDK_Projects\Shared Projects\HaE WeaponUtils\HaE WeaponUtils.projitems" Label="Shared" />
+  <Import Project="..\..\..\..\MDK_Projects\Shared Projects\HaE Timing\HaE Timing.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="mdk\mdk.options" DestinationFolder="$(TargetDir)\mdk" />

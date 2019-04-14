@@ -22,6 +22,8 @@ namespace IngameScript
     {
         Scheduler scheduler;
         INISerializer cannonSettings;
+        IngameTime ingameTime;
+        GridTerminalSystemUtils GTSUtils;
 
         Cannon cannon;
         Targeter targeter;
@@ -39,6 +41,7 @@ namespace IngameScript
             cannonSettings.AddValue("referenceName", x => x, "RCReference");
             cannonSettings.AddValue("speedCap", x => double.Parse(x), "RCReference");
             cannonSettings.AddValue("launchVelocity", x => double.Parse(x), "RCReference");
+            cannonSettings.AddValue("sourceRotorTName", x => x, "[OrbitalCannonBase] [Azimuth]");
 
 
             if (Me.CustomData == "")
@@ -52,7 +55,12 @@ namespace IngameScript
                 cannonSettings.DeSerialize(Me.CustomData);
             }
             yield return true;
+            ingameTime = new IngameTime();
+            GTSUtils = new GridTerminalSystemUtils(Me, GridTerminalSystem);
+
+            yield return true;
             IMyShipController reference = GridTerminalSystem.GetBlockWithName((string)cannonSettings.GetValue("referenceName")) as IMyShipController;
+            IMyMotorStator sourceRotor = GridTerminalSystem.GetBlockWithName((string)cannonSettings.GetValue("sourceRotorTName")) as IMyMotorStator;
 
             yield return true;
             targeter = new Targeter
@@ -65,7 +73,7 @@ namespace IngameScript
 
             yield return true;
 
-
+            cannon = Cannon.CreateCannon(sourceRotor, GTSUtils, ingameTime, reference, "[Azimuth]", "[Elevation]");
         }
 
 
