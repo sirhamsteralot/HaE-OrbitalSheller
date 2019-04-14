@@ -79,12 +79,15 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
+            ingameTime.Tick();
+
             targeter.TargetingLoop();
+            cannon.Tick();
         }
 
-        public void TargetCalculatedCallback(Vector3D position)
+        public void TargetCalculatedCallback(Vector3D direction)
         {
-
+            cannon.TargetDirection(ref direction);
         }
     }
 }
