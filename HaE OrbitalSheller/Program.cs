@@ -79,10 +79,56 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
-            ingameTime.Tick();
+            HandleCommands(argument);
 
-            targeter.TargetingLoop();
-            cannon.Tick();
+            if ((updateSource & UpdateType.Update1) != 0)
+            {
+                ingameTime.Tick();
+
+                targeter.TargetingLoop();
+                cannon.Tick();
+            }
+        }
+
+        public void HandleCommands(string argument)
+        {
+            if (argument.StartsWith("TargetPosition "))
+                TargetPosition(argument);
+        }
+
+        public void TargetPosition(string args)
+        {
+            string[] split = args.Split(' ');
+
+            if (split.Length < 4)
+            {
+                Echo("Invalid Argument");
+                return;
+            }
+
+            Vector3D targetPosition;
+            if (!Vector3D.TryParse(split[1], out targetPosition))
+            {
+                Echo("Invalid Position");
+                return;
+            }
+
+            Vector3D planetPosition;
+            if (!Vector3D.TryParse(split[2], out planetPosition))
+            {
+                Echo("Invalid Planet Position");
+                return;
+            }
+
+            double planetRadius;
+            if (!double.TryParse(split[3], out planetRadius))
+            {
+                Echo("Invalid Radius");
+                return;
+            }
+
+            targeter.TargetPosition(targetPosition, planetPosition, planetRadius);
+            Echo($"Targeting...\nTarget: {targetPosition}\nplanetCore: {planetPosition}\nplanetRadius:{planetRadius}");
         }
 
         public void TargetCalculatedCallback(Vector3D direction)

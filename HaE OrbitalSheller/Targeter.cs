@@ -48,6 +48,16 @@ namespace IngameScript
                 fireCallbackOnce = false;
             }
 
+            public void TargetPosition(Vector3D position, Vector3D planetCenter, double planetRadius)
+            {
+                Vector3D startPos = reference.GetPosition();
+                Vector3D direction = Vector3D.Normalize(position - startPos);
+
+                simTargeting = new Simulated_Targeting(reference, position, startPos, direction, 0, planetCenter, planetRadius, 9.81, launchVelocity, speedCap);
+
+                fireCallbackOnce = false;
+            }
+
             public void TargetingLoop()
             {
                 if (simTargeting?.Calculate() ?? false && !fireCallbackOnce)
