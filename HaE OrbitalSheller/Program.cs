@@ -45,6 +45,7 @@ namespace IngameScript
             cannonSettings.AddValue("speedCap", x => double.Parse(x), 104.38);
             cannonSettings.AddValue("launchVelocity", x => double.Parse(x), 100);
             cannonSettings.AddValue("sourceRotorTName", x => x, "[OrbitalCannonBase]_[Azimuth]");
+            cannonSettings.AddValue("timerName", x => x, "CannonTimer");
 
 
             if (Me.CustomData == "")
@@ -64,6 +65,7 @@ namespace IngameScript
             yield return true;
             IMyShipController reference = GridTerminalSystem.GetBlockWithName((string)cannonSettings.GetValue("referenceName")) as IMyShipController;
             IMyMotorStator sourceRotor = GridTerminalSystem.GetBlockWithName((string)cannonSettings.GetValue("sourceRotorTName")) as IMyMotorStator;
+            IMyTimerBlock timer = GridTerminalSystem.GetBlockWithName((string)cannonSettings.GetValue("timerName")) as IMyTimerBlock;
 
             Echo($"Getting blocks status:...\nreference: {reference != null}\nsourceRotor: {sourceRotor != null}");
 
@@ -82,6 +84,7 @@ namespace IngameScript
             yield return true;
 
             cannon = Cannon.CreateCannon(sourceRotor, GTSUtils, ingameTime, reference, "[Azimuth]", "[Elevation]");
+            cannon.Timer = timer;
             yield return true;
             Echo("Initialized!");
             initialized = true;

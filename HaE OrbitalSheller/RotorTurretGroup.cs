@@ -27,6 +27,7 @@ namespace IngameScript
             public bool restMode = false;
             public bool inactive = false;
             public bool restAfterReset = true;
+            public IMyTimerBlock timer;
 
             Vector3D currentTargetDir = Vector3D.Zero;
 
@@ -34,12 +35,13 @@ namespace IngameScript
             public double azimuthMultiplier { get { return (double)turretConfig.GetValue("azimuthMultiplier"); } }
             public double elevationMultiplier { get { return (double)turretConfig.GetValue("elevationMultiplier"); } }
             public double salvoTimeout { get { return (double)turretConfig.GetValue("salvoTimeout"); } }
-            public string timerName { get { return (string)turretConfig.GetValue("timerName"); } }
 
             DeadzoneProvider deadzoneProvider;
             RotorControl rotorControl;
             List<RotorSpring> launchers = new List<RotorSpring>();
             IngameTime ingameTime;
+
+            
 
 
             public RotorTurretGroup(List<IMyMotorStator> rotors, IngameTime ingameTime, DeadzoneProvider deadzoneProvider, string azimuthTag, string elevationTag)
@@ -83,7 +85,6 @@ namespace IngameScript
                 turretConfig.AddValue("azimuthMultiplier", x => double.Parse(x), -1.0);
                 turretConfig.AddValue("elevationMultiplier", x => double.Parse(x), -1.0);
                 turretConfig.AddValue("salvoSize", x => int.Parse(x), 5);
-                turretConfig.AddValue("timerName", x => x, "CannonTimer");
 
                 if (rotorControl.azimuth.rotor.CustomData == "")
                 {
@@ -101,6 +102,7 @@ namespace IngameScript
                 {
                     var launcher = new RotorSpring(cannonbase, ingameTime, salvoTimeout);
                     launchers.Add(launcher);
+                    launcher.cannonFiredCallback += FireCallback;
                 }
             }
 
@@ -195,6 +197,11 @@ namespace IngameScript
 
                 foreach (var cannon in launchers)
                     cannon.Salvo();
+            }
+
+            private void FireCallback()
+            {
+                timer?.Trigger();
             }
 
             private void OnTarget(bool val, RotorControl.RotorReferencePair pair)

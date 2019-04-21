@@ -27,6 +27,8 @@ namespace IngameScript
 
             IMyShipController reference;
 
+            public IMyTimerBlock Timer { get { return rotorTurretGroup.timer; } set { rotorTurretGroup.timer = value; } }
+
 
             public static Cannon CreateCannon
                 (
