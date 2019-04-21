@@ -33,12 +33,11 @@ namespace IngameScript
             INISerializer turretConfig;
             public double azimuthMultiplier { get { return (double)turretConfig.GetValue("azimuthMultiplier"); } }
             public double elevationMultiplier { get { return (double)turretConfig.GetValue("elevationMultiplier"); } }
-            public int salvoSize { get { return (int)turretConfig.GetValue("salvoSize"); } }
             public double salvoTimeout { get { return (double)turretConfig.GetValue("salvoTimeout"); } }
 
             DeadzoneProvider deadzoneProvider;
             RotorControl rotorControl;
-            List<RotorLauncher> launchers = new List<RotorLauncher>();
+            List<RotorSpring> launchers = new List<RotorSpring>();
             IngameTime ingameTime;
 
 
@@ -99,7 +98,7 @@ namespace IngameScript
 
                 foreach (var cannonbase in cannonBases)
                 {
-                    var launcher = new RotorLauncher(cannonbase, ingameTime, salvoTimeout);
+                    var launcher = new RotorSpring(cannonbase, ingameTime, salvoTimeout);
                     launchers.Add(launcher);
                 }
             }
@@ -194,7 +193,7 @@ namespace IngameScript
                 restAfterReset = false;
 
                 foreach (var cannon in launchers)
-                    cannon.Salvo(salvoSize);
+                    cannon.Salvo();
             }
 
             private void OnTarget(bool val, RotorControl.RotorReferencePair pair)
