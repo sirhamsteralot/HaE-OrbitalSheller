@@ -20,6 +20,7 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+
         Scheduler scheduler;
         INISerializer cannonSettings;
         IngameTime ingameTime;

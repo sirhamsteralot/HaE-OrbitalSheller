@@ -34,6 +34,7 @@ namespace IngameScript
             public double azimuthMultiplier { get { return (double)turretConfig.GetValue("azimuthMultiplier"); } }
             public double elevationMultiplier { get { return (double)turretConfig.GetValue("elevationMultiplier"); } }
             public double salvoTimeout { get { return (double)turretConfig.GetValue("salvoTimeout"); } }
+            public string timerName { get { return (string)turretConfig.GetValue("timerName"); } }
 
             DeadzoneProvider deadzoneProvider;
             RotorControl rotorControl;
@@ -81,8 +82,8 @@ namespace IngameScript
 
                 turretConfig.AddValue("azimuthMultiplier", x => double.Parse(x), -1.0);
                 turretConfig.AddValue("elevationMultiplier", x => double.Parse(x), -1.0);
-                turretConfig.AddValue("salvoSize", x => int.Parse(x), 3);
-                turretConfig.AddValue("salvoTimeout", x => double.Parse(x), 2.5);
+                turretConfig.AddValue("salvoSize", x => int.Parse(x), 5);
+                turretConfig.AddValue("timerName", x => x, "CannonTimer");
 
                 if (rotorControl.azimuth.rotor.CustomData == "")
                 {
