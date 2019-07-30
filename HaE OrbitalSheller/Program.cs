@@ -43,7 +43,8 @@ namespace IngameScript
             cannonSettings = new INISerializer("CannonSettings");
             cannonSettings.AddValue("referenceName", x => x, "RCReference");
             cannonSettings.AddValue("speedCap", x => double.Parse(x), 104.38);
-            cannonSettings.AddValue("launchVelocity", x => double.Parse(x), 100);
+            cannonSettings.AddValue("launchVelocity", x => double.Parse(x), 100.0);
+            cannonSettings.AddValue("tolerance", x => double.Parse(x), 10.0);
             cannonSettings.AddValue("sourceRotorTName", x => x, "[OrbitalCannonBase]_[Azimuth]");
             cannonSettings.AddValue("timerName", x => x, "CannonTimer");
 
@@ -80,6 +81,7 @@ namespace IngameScript
                     reference
                 );
             targeter.directionFoundCallback += TargetCalculatedCallback;
+            targeter.tolerance = (double)cannonSettings.GetValue("tolerance");
 
             yield return true;
 
@@ -103,14 +105,13 @@ namespace IngameScript
             if ((updateSource & UpdateType.Update1) != 0)
             {
                 ingameTime.Tick();
-
                 targeter.TargetingLoop();
                 cannon.Tick();
             }
 
             if ((updateSource & UpdateType.Update10) != 0)
             {
-                Me.GetSurface(0).WriteText($"{targeter.TargetingProgress}");
+                Me.GetSurface(1).WriteText($"{targeter.TargetingProgress}");
             }
         }
 

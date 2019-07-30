@@ -48,6 +48,7 @@ namespace IngameScript
 
                 simTargeting = new Simulated_Targeting(reference, position, startPos, direction, 0, planet, 9.81, launchVelocity, speedCap);
                 simTargeting.tolerance = tolerance;
+                simTargeting.negationFactor = 0.001;
 
                 fireCallbackOnce = false;
             }
@@ -59,6 +60,7 @@ namespace IngameScript
 
                 simTargeting = new Simulated_Targeting(reference, position, startPos, direction, 0, planetCenter, planetRadius, gravity, launchVelocity, speedCap);
                 simTargeting.tolerance = tolerance;
+                simTargeting.negationFactor = 0.001;
 
                 fireCallbackOnce = false;
             }

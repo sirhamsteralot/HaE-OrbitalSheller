@@ -27,6 +27,7 @@ namespace IngameScript
             public bool restMode = false;
             public bool inactive = false;
             public bool restAfterReset = true;
+            public bool fireOnce = false;
             public IMyTimerBlock timer;
 
             Vector3D currentTargetDir = Vector3D.Zero;
@@ -65,7 +66,29 @@ namespace IngameScript
                 IMyMotorStator azimuth = rotors.First(x => x.CustomName.Contains(azimuthTag));
                 defaultDir = azimuth.WorldMatrix.Forward;
 
+                #region configuration
+                turretConfig = new INISerializer("TurretConfig");
+
+                turretConfig.AddValue("azimuthMultiplier", x => double.Parse(x), -1.0);
+                turretConfig.AddValue("elevationMultiplier", x => double.Parse(x), -1.0);
+                turretConfig.AddValue("referenceName", x => x, "TurretReference");
+
+                if (azimuth.CustomData == "")
+                {
+                    string temp = azimuth.CustomData;
+                    turretConfig.FirstSerialization(ref temp);
+                    azimuth.CustomData = temp;
+                }
+                else
+                {
+                    turretConfig.DeSerialize(azimuth.CustomData);
+                }
+                #endregion
+
                 IMyTerminalBlock cannonref = GTS.GridTerminalSystem.GetBlockWithName(referenceName);
+
+                if (cannonref == null)
+                    throw new Exception($"referenceName ({referenceName}) resolves to NULL!");
 
                 List<RotorControl.RotorReferencePair> elevationPairs = new List<RotorControl.RotorReferencePair>();
                 for (int i = 0; i < elevation.Count; i++)
@@ -76,26 +99,8 @@ namespace IngameScript
                 RotorControl.RotorReferencePair azimuthPair = new RotorControl.RotorReferencePair { rotor = azimuth, reference = cannonref };
 
                 rotorControl = new RotorControl(azimuthPair, elevationPairs);
-                rotorControl.onTarget = OnTarget;
-
-                #region configuration
-                turretConfig = new INISerializer("TurretConfig");
-
-                turretConfig.AddValue("azimuthMultiplier", x => double.Parse(x), -1.0);
-                turretConfig.AddValue("elevationMultiplier", x => double.Parse(x), -1.0);
-                turretConfig.AddValue("referenceName", x => x, "TurretReference");
-
-                if (rotorControl.azimuth.rotor.CustomData == "")
-                {
-                    string temp = rotorControl.azimuth.rotor.CustomData;
-                    turretConfig.FirstSerialization(ref temp);
-                    rotorControl.azimuth.rotor.CustomData = temp;
-                }
-                else
-                {
-                    turretConfig.DeSerialize(rotorControl.azimuth.rotor.CustomData);
-                }
-                #endregion
+                rotorControl.onTarget += OnTarget;
+                rotorControl.useForward = true;
             }
 
             public void Tick()
@@ -110,6 +115,7 @@ namespace IngameScript
                 {
                     rotorControl.AimAtTarget(ref defaultDir, azimuthMultiplier, elevationMultiplier);
                     restAfterReset = true;
+                    fireOnce = true;
                     return;
                 }
 
@@ -183,11 +189,17 @@ namespace IngameScript
 
                 restMode = false;
                 restAfterReset = false;
+
+                FireCallback();
             }
 
             private void FireCallback()
             {
+                if (!fireOnce)
+                    return;
+
                 timer?.Trigger();
+                fireOnce = false;
             }
 
             private void OnTarget(bool val, RotorControl.RotorReferencePair pair)
