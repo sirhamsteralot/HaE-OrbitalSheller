@@ -63,7 +63,7 @@ namespace IngameScript
                     currentTop.Clear();
                 }
 
-                var turretGroup = new RotorTurretGroup(rotors, ingameTime, deadzoneProvider, azimuthTag, elevationTag);
+                var turretGroup = new RotorTurretGroup(rotors, ingameTime, deadzoneProvider, azimuthTag, elevationTag, GTS);
                 turretGroup.TargetDirection(ref Vector3D.Zero);
                 turretGroup.defaultDir = control.WorldMatrix.Forward;
 
@@ -77,7 +77,7 @@ namespace IngameScript
             {
                 this.reference = reference;
                 deadzoneProvider = new DeadzoneProvider(GTSUtils);
-                rotorTurretGroup = new RotorTurretGroup(rotors, ingameTime, deadzoneProvider, azimuthTag, elevationTag);
+                rotorTurretGroup = new RotorTurretGroup(rotors, ingameTime, deadzoneProvider, azimuthTag, elevationTag, GTSUtils);
             }
 
             public Cannon(RotorTurretGroup rotorTurretGroup, DeadzoneProvider deadzoneProvider, IMyShipController reference)

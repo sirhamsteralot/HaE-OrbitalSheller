@@ -34,30 +34,29 @@ namespace IngameScript
             INISerializer turretConfig;
             public double azimuthMultiplier { get { return (double)turretConfig.GetValue("azimuthMultiplier"); } }
             public double elevationMultiplier { get { return (double)turretConfig.GetValue("elevationMultiplier"); } }
-            public double salvoTimeout { get { return (double)turretConfig.GetValue("salvoTimeout"); } }
+            public string referenceName { get { return (string)turretConfig.GetValue("referenceName"); } }
 
             DeadzoneProvider deadzoneProvider;
             RotorControl rotorControl;
-            List<RotorSpring> launchers = new List<RotorSpring>();
             IngameTime ingameTime;
 
             
 
 
-            public RotorTurretGroup(List<IMyMotorStator> rotors, IngameTime ingameTime, DeadzoneProvider deadzoneProvider, string azimuthTag, string elevationTag)
+            public RotorTurretGroup(List<IMyMotorStator> rotors, IngameTime ingameTime, DeadzoneProvider deadzoneProvider, string azimuthTag, string elevationTag, GridTerminalSystemUtils GTS)
             {
-                Setup(rotors, ingameTime, deadzoneProvider, azimuthTag, elevationTag);
+                Setup(rotors, ingameTime, deadzoneProvider, azimuthTag, elevationTag, GTS);
             }
 
-            public RotorTurretGroup(IMyBlockGroup turretGroup, IngameTime ingameTime, DeadzoneProvider deadzoneProvider, string azimuthTag, string elevationTag)
+            public RotorTurretGroup(IMyBlockGroup turretGroup, IngameTime ingameTime, DeadzoneProvider deadzoneProvider, string azimuthTag, string elevationTag, GridTerminalSystemUtils GTS)
             {
                 var rotors = new List<IMyMotorStator>();
                 turretGroup.GetBlocksOfType(rotors);
 
-                Setup(rotors, ingameTime, deadzoneProvider, azimuthTag, elevationTag);
+                Setup(rotors, ingameTime, deadzoneProvider, azimuthTag, elevationTag, GTS);
             }
 
-            public void Setup(List<IMyMotorStator> rotors, IngameTime ingameTime, DeadzoneProvider deadzoneProvider, string azimuthTag, string elevationTag)
+            public void Setup(List<IMyMotorStator> rotors, IngameTime ingameTime, DeadzoneProvider deadzoneProvider, string azimuthTag, string elevationTag, GridTerminalSystemUtils GTS)
             {
                 this.deadzoneProvider = deadzoneProvider;
                 this.ingameTime = ingameTime;
@@ -66,15 +65,15 @@ namespace IngameScript
                 IMyMotorStator azimuth = rotors.First(x => x.CustomName.Contains(azimuthTag));
                 defaultDir = azimuth.WorldMatrix.Forward;
 
-                List<IMyMotorStator> cannonBases = Select(elevation);
+                IMyTerminalBlock cannonref = GTS.GridTerminalSystem.GetBlockWithName(referenceName);
 
                 List<RotorControl.RotorReferencePair> elevationPairs = new List<RotorControl.RotorReferencePair>();
                 for (int i = 0; i < elevation.Count; i++)
                 {
-                    elevationPairs.Add(new RotorControl.RotorReferencePair { rotor = elevation[i], reference = cannonBases[i] });
+                    elevationPairs.Add(new RotorControl.RotorReferencePair { rotor = elevation[i], reference = cannonref });
                 }
 
-                RotorControl.RotorReferencePair azimuthPair = new RotorControl.RotorReferencePair { rotor = azimuth, reference = cannonBases[0] };
+                RotorControl.RotorReferencePair azimuthPair = new RotorControl.RotorReferencePair { rotor = azimuth, reference = cannonref };
 
                 rotorControl = new RotorControl(azimuthPair, elevationPairs);
                 rotorControl.onTarget = OnTarget;
@@ -84,7 +83,7 @@ namespace IngameScript
 
                 turretConfig.AddValue("azimuthMultiplier", x => double.Parse(x), -1.0);
                 turretConfig.AddValue("elevationMultiplier", x => double.Parse(x), -1.0);
-                turretConfig.AddValue("salvoSize", x => int.Parse(x), 5);
+                turretConfig.AddValue("referenceName", x => x, "TurretReference");
 
                 if (rotorControl.azimuth.rotor.CustomData == "")
                 {
@@ -97,13 +96,6 @@ namespace IngameScript
                     turretConfig.DeSerialize(rotorControl.azimuth.rotor.CustomData);
                 }
                 #endregion
-
-                foreach (var cannonbase in cannonBases)
-                {
-                    var launcher = new RotorSpring(cannonbase, ingameTime, salvoTimeout);
-                    launchers.Add(launcher);
-                    launcher.cannonFiredCallback += FireCallback;
-                }
             }
 
             public void Tick()
@@ -113,9 +105,6 @@ namespace IngameScript
 
                 if (inactive)
                     return;
-
-                foreach (var gun in launchers)
-                    gun.Tick();
 
                 if (currentTargetDir == Vector3D.Zero)
                 {
@@ -194,9 +183,6 @@ namespace IngameScript
 
                 restMode = false;
                 restAfterReset = false;
-
-                foreach (var cannon in launchers)
-                    cannon.Salvo();
             }
 
             private void FireCallback()
