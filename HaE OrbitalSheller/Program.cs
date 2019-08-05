@@ -44,8 +44,8 @@ namespace IngameScript
             cannonSettings.AddValue("referenceName", x => x, "RCReference");
             cannonSettings.AddValue("speedCap", x => double.Parse(x), 104.38);
             cannonSettings.AddValue("launchVelocity", x => double.Parse(x), 100.0);
-            cannonSettings.AddValue("tolerance", x => double.Parse(x), 10.0);
             cannonSettings.AddValue("sourceRotorTName", x => x, "[OrbitalCannonBase]_[Azimuth]");
+            cannonSettings.AddValue("elevationTag", x => x, "[Elevation]");
             cannonSettings.AddValue("timerName", x => x, "CannonTimer");
 
 
@@ -81,11 +81,10 @@ namespace IngameScript
                     reference
                 );
             targeter.directionFoundCallback += TargetCalculatedCallback;
-            targeter.tolerance = (double)cannonSettings.GetValue("tolerance");
 
             yield return true;
 
-            cannon = Cannon.CreateCannon(sourceRotor, GTSUtils, ingameTime, reference, "[Azimuth]", "[Elevation]");
+            cannon = Cannon.CreateCannon(sourceRotor, GTSUtils, ingameTime, reference, (string)cannonSettings.GetValue("sourceRotorTName"), (string)cannonSettings.GetValue("elevationTag"));
             cannon.Timer = timer;
             yield return true;
             Echo("Initialized!");
@@ -111,7 +110,7 @@ namespace IngameScript
 
             if ((updateSource & UpdateType.Update10) != 0)
             {
-                Me.GetSurface(1).WriteText($"{targeter.TargetingProgress}");
+                Me.GetSurface(0).WriteText($"{targeter.TargetingProgress}");
             }
         }
 
@@ -119,6 +118,16 @@ namespace IngameScript
         {
             if (argument.StartsWith("TargetPosition"))
                 TargetPosition(argument);
+
+            if (argument.StartsWith("Reset"))
+                Reset();
+
+        }
+        
+        public void Reset()
+        {
+            Echo("Resetting...");
+            scheduler.AddTask(Init());
         }
 
         public void TargetPosition(string args)
@@ -144,7 +153,7 @@ namespace IngameScript
                 Echo("Invalid Planet Position");
                 return;
             }
-
+            cannon.EnterIdle();
             double planetRadius;
             if (!double.TryParse(split[3], out planetRadius))
             {
@@ -152,13 +161,21 @@ namespace IngameScript
                 return;
             }
 
+            double tolerance = 10;
+            if (split.Length > 4 && !double.TryParse(split[4], out tolerance))
+            {
+                Echo("Invalid tolerance");
+                return;
+            }
+
             double tweakFactor = 1;
-            if (split.Length > 4 && !double.TryParse(split[4], out tweakFactor))
+            if (split.Length > 5 && !double.TryParse(split[5], out tweakFactor))
             {
                 Echo("Invalid tweakFactor");
                 return;
             }
 
+            targeter.tolerance = tolerance;
             targeter.TargetPosition(targetPosition, planetPosition, planetRadius, 9.81 * tweakFactor);
             Echo($"Targeting...\nTarget: {targetPosition}\nplanetCore: {planetPosition}\nplanetRadius: {planetRadius}\ntweakFactor: {tweakFactor}");
         }

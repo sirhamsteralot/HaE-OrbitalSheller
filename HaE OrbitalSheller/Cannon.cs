@@ -106,7 +106,7 @@ namespace IngameScript
             {
                 rotorTurretGroup.TargetDirection(ref Vector3D.Zero);
                 rotorTurretGroup.defaultDir = reference.WorldMatrix.Forward;
-                rotorTurretGroup.restAfterReset = true;
+                //rotorTurretGroup.restAfterReset = true;
             }
         }
     }
