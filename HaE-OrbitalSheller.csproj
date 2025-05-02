@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netframework48</TargetFramework>
     <RootNamespace>IngameScript</RootNamespace>
@@ -23,4 +23,12 @@
     <AdditionalFiles Include="Instructions.readme" />
     <AdditionalFiles Include="thumb.png" />
   </ItemGroup>
+  <Import Project="..\HaE-Shared-Projects\HaE GridTerminalSystemUtils\HaE GridTerminalSystemUtils.projitems" Label="Shared" />
+  <Import Project="..\HaE-Shared-Projects\HaE Scheduler\HaE Scheduler.projitems" Label="Shared" />
+  <Import Project="..\HaE-Shared-Projects\HaE Serialization\HaE Serialization.projitems" Label="Shared" />
+  <Import Project="..\HaE-Shared-Projects\HaE Timing\HaE Timing.projitems" Label="Shared" />
+  <Import Project="..\HaE-Shared-Projects\HaE Targeting\HaE Targeting.projitems" Label="Shared" />
+  <Import Project="..\HaE-Shared-Projects\VectorUtils\VectorUtils.projitems" Label="Shared" />
+  <Import Project="..\HaE-Shared-Projects\HaE RotorUtils\HaE RotorUtils.projitems" Label="Shared" />
+  <Import Project="..\HaE-Shared-Projects\HaE WeaponUtils\HaE WeaponUtils.projitems" Label="Shared" />
 </Project>
